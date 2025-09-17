@@ -48,4 +48,4 @@ jobs:
           ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
     - name: Show image tag used
-      run: echo "Pushed tags: $IMAGE_NAME:latest and $IMAGE_NAME:${GITHUB_SHA}"
+      run: echo "Pushed: $IMAGE_NAME:latest and $IMAGE_NAME:${GITHUB_SHA}"
