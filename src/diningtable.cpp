@@ -1,4 +1,4 @@
-#include "diningTable.hpp"
+#include "diningtable.hpp"
 #include "philosopher.hpp"
 #include <iostream>
 
