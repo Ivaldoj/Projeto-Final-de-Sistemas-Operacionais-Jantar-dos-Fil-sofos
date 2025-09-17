@@ -1,4 +1,4 @@
-#include "Philosopher.hpp"
+#include "philosopher.hpp"
 #include <iostream>
 
 Philosopher::Philosopher(int id)
