@@ -1,17 +1,16 @@
-# Compila tudo que estiver em src/
-CC=gcc
-CFLAGS=-O2 -Wall -pthread
-TARGET=filosofos
+# Variáveis
+CXX = g++
+CXXFLAGS = -O2 -Wall -pthread
+SRC_DIR = src
+SRC = $(wildcard $(SRC_DIR)/*.cpp)
+OUT = filosofos
 
-SRC=$(wildcard src/*.c)
+# Regra padrão
+all: $(OUT)
 
-all: $(TARGET)
+$(OUT): $(SRC)
+	$(CXX) $(CXXFLAGS) -o $(OUT) $(SRC)
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)
-
-run: all
-	./$(TARGET)
-
+# Limpeza
 clean:
-	rm -f $(TARGET)
+	rm -f $(OUT)
