@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "Philosopher.hpp"
+#include "philosopher.hpp"
 
 class DiningTable {
 public:
