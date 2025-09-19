@@ -3,16 +3,15 @@ TARGET = philosophers
 
 # Compilador e flags
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -O2
+CXXFLAGS = -std=c++17 -Wall -Wextra -O2 -pthread
 
-# Se estiver no Linux/WSL/Docker use -pthread
-# No Windows (MinGW) pode tirar -pthread se der erro
-THREADFLAGS = -pthread
+# Fontes
+SOURCES = $(wildcard src/*.cpp)
 
-# Diretórios
-SRC_DIR = src
-OBJ_DIR = build
+# Regra padrão
+all:
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(TARGET)
 
-# Arquivos fonte e objetos
-SOURCES = $(wildcard $(SRC_DIR)/*.cpp)
-OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SOURCES))
+# Limpeza
+clean:
+	rm -f $(TARGET) *.o
