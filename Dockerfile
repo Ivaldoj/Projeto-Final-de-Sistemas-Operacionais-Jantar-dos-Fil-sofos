@@ -1,11 +1,16 @@
-# Etapa de build
-FROM gcc:latest AS builder
+FROM ubuntu:24.04
+
+# Instala dependências
+RUN apt-get update -y && apt-get install -y build-essential
+
+# Cria diretório de trabalho
 WORKDIR /app
+
+# Copia tudo
 COPY . .
+
+# Compila com make
 RUN make
 
-# Etapa de runtime (imagem final menor)
-FROM debian:stable-slim
-WORKDIR /app
-COPY --from=builder /app/filosofos /app/filosofos
-CMD ["./filosofos"]
+# Comando padrão
+CMD ["./philosophers"]
