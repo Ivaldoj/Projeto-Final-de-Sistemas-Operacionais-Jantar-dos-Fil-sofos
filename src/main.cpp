@@ -1,9 +1,11 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <limits>
 
 #include "philosopher.hpp"
 #include "diningtable.hpp"
+#include "mutexmode.hpp"
 
 enum class SolutionType {
     Monitor = 1,
@@ -12,46 +14,41 @@ enum class SolutionType {
     WaiterArbiter
 };
 
-// solução com monitor
-void run_monitor_solution() {
-    const int N = 5;
-    DiningTable table(N);
-    table.showPhilosophers(); 
-}
-// solução com semáforos
-void run_semaphores_solution() {
-    std::cout << "Implementar solução com semáforos por filósofo.\n";
-}
-// solução com mutex por garfo
-void run_mutexforks_solution() {
-    std::cout << "Implementar solução com um mutex por garfo.\n";
-}
-// solução com garçom que limita quem pode comer
-void run_waiter_solution() {
-    std::cout << "Implementar solução com garçom que limita quem pode comer.\n";
-}
-
 // função para executar a solução escolhida
 void run_solution(SolutionType t) {
+    const int N = 5;
+    std::vector<Philosopher> philosophers;
+    philosophers.reserve(N);
+    for (int i = 0; i < N; i++) philosophers.emplace_back(i);
+
     switch (t) {
-        case SolutionType::Monitor:        run_monitor_solution();        break;
-        case SolutionType::Semaphores:     run_semaphores_solution();     break;
-        case SolutionType::MutexForks:     run_mutexforks_solution();     break;
-        case SolutionType::WaiterArbiter:  run_waiter_solution();         break;
+        case SolutionType::Monitor:
+            std::cout << "[MODO MONITOR] ainda nao implementado\n";
+            break;
+        case SolutionType::Semaphores:
+            std::cout << "[MODO SEMAFORO] ainda nao implementado\n";
+            break;
+        case SolutionType::MutexForks:
+            runMutexMode(philosophers);
+            break;
+        case SolutionType::WaiterArbiter:
+            std::cout << "[MODO GARCOM] ainda nao implementado\n";
+            break;
     }
 }
 
 int main() {
     while (true) {
         std::cout << "\n=== Dining Philosophers — Escolha a Solucao ===\n"
-                  << "1) Monitor \n"
-                  << "2) Semaforos \n"
-                  << "3) Mutex por garfo \n"
-                  << "4) Garcom / Arbitro \n"
+                  << "1) Monitor (mutex + condvar)\n"
+                  << "2) Semaforos\n"
+                  << "3) Mutex por garfo\n"
+                  << "4) Garcom / Arbitro\n"
                   << "0) Sair\n> ";
 
-        int op; 
+        int op;
         if (!(std::cin >> op)) return 0;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
         if (op == 0) break;
         if (op < 0 || op > 4) {
             std::cout << "Opcao invalida.\n";
