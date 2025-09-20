@@ -6,6 +6,7 @@
 #include "philosopher.hpp"
 #include "diningtable.hpp"
 #include "mutexmode.hpp"
+#include "waitermode.hpp"
 
 enum class SolutionType {
     Monitor = 1,
@@ -32,14 +33,14 @@ void run_solution(SolutionType t) {
             runMutexMode(philosophers);
             break;
         case SolutionType::WaiterArbiter:
-            std::cout << "[MODO GARCOM] ainda nao implementado\n";
+        runWaiterMode(philosophers);
             break;
     }
 }
 
 int main() {
     while (true) {
-        std::cout << "\n=== Dining Philosophers — Escolha a Solucao ===\n"
+        std::cout << "\n=== Dining Philosophers. Escolha a Solucao ===\n"
                   << "1) Monitor (mutex + condvar)\n"
                   << "2) Semaforos\n"
                   << "3) Mutex por garfo\n"
