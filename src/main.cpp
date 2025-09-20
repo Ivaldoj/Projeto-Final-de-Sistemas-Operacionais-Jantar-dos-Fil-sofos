@@ -7,6 +7,7 @@
 #include "diningtable.hpp"
 #include "mutexmode.hpp"
 #include "waitermode.hpp"
+#include "semaphoremode.hpp"
 
 enum class SolutionType {
     Monitor = 1,
@@ -26,14 +27,14 @@ void run_solution(SolutionType t) {
         case SolutionType::Monitor:
             std::cout << "[MODO MONITOR] ainda nao implementado\n";
             break;
-        case SolutionType::Semaphores:
-            std::cout << "[MODO SEMAFORO] ainda nao implementado\n";
-            break;
         case SolutionType::MutexForks:
             runMutexMode(philosophers);
             break;
         case SolutionType::WaiterArbiter:
         runWaiterMode(philosophers);
+            break;
+        case SolutionType::Semaphores:
+            runSemaphoreMode(philosophers);
             break;
     }
 }
