@@ -10,31 +10,31 @@
 #include <numeric>
 
 namespace {
-    const int N = 5;
-    const int ROUNDS = 200; // rodadas fixas para teste
+    const int N = 5;            // número de filósofos
+    const int ROUNDS = 200;     // rodadas por filósofo
 
-    sem_t forks[N];        // semáforo para cada garfo
-    sem_t room;            // semáforo global (limita N-1 filósofos)
+    sem_t forks[N];             // semáforo para cada garfo
+    sem_t room;                 // semáforo global que limita N-1 filósofos
     std::mutex stats_mutex;
 
     struct PhilosopherStats {
-        int meals = 0;
-        std::vector<long long> wait_times;
+        int meals = 0;                          // refeições feitas
+        std::vector<long long> wait_times;      // tempos de espera em ms
     };
 
     std::vector<PhilosopherStats> stats(N);
 
     void philosopherLife(int id) {
-        int left = id;
-        int right = (id + 1) % N;
+        int left = id;               // garfo da esquerda
+        int right = (id + 1) % N;    // garfo da direita
 
         for (int count = 0; count < ROUNDS; count++) {
             auto start_wait = std::chrono::high_resolution_clock::now();
 
-            // entra na "sala" (limite de N-1 filósofos simultâneos)
+            // entra na sala (máximo N-1 filósofos podem tentar comer)
             sem_wait(&room);
 
-            // pega garfos (ordem pode ser arbitrária, mas consistente)
+            // pega os garfos
             sem_wait(&forks[left]);
             sem_wait(&forks[right]);
 
@@ -55,7 +55,7 @@ namespace {
             sem_post(&forks[left]);
             sem_post(&forks[right]);
 
-            // sai da sala
+            // libera a vaga na sala
             sem_post(&room);
 
             // simula pensar
@@ -70,12 +70,13 @@ void runSemaphoreMode(std::vector<Philosopher>& philosophers) {
 
     // inicializa semáforos
     for (int i = 0; i < N; i++) {
-        sem_init(&forks[i], 0, 1); // cada garfo começa disponível
+        sem_init(&forks[i], 0, 1);
     }
-    sem_init(&room, 0, N - 1); // no máximo 4 filósofos tentando comer
+    sem_init(&room, 0, N - 1);
 
     auto start = std::chrono::high_resolution_clock::now();
 
+    // cria threads
     std::vector<std::thread> threads;
     for (int i = 0; i < (int)philosophers.size(); i++) {
         threads.emplace_back(philosopherLife, i);

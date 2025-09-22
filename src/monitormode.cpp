@@ -1,146 +1,121 @@
-#include "monitormode.hpp"  
-#include "philosopher.hpp"
+#include "monitormode.hpp"
 #include <iostream>
 #include <thread>
+#include <vector>
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
-#include <vector>
 #include <numeric>
 
 namespace {
+    const int N = 5;          // número de filósofos
+    const int ROUNDS = 200;   // rodadas por filósofo (pode ajustar conforme teste)
+
     // Estados possíveis de um filósofo
     enum State { THINKING, HUNGRY, EATING };
 
-    // Monitor que encapsula toda a lógica de sincronização
+    // Estrutura para estatísticas de desempenho
+    struct PhilosopherStats {
+        int meals = 0;                          // refeições realizadas
+        std::vector<long long> wait_times;      // tempos de espera (ms)
+    };
+
+    // Classe Monitor implementando a lógica do jantar
     class DiningMonitor {
     private:
-        mutable std::mutex monitor_mutex;
-        std::condition_variable self[5];  // cada filósofo tem sua própria condition_variable
-        State state[5];
+        std::mutex mtx;                          // mutex para proteger a seção crítica
+        std::condition_variable cv[N];           // uma condição por filósofo
+        State state[N];                          // estado atual de cada filósofo
 
     public:
         DiningMonitor() {
-            for (int i = 0; i < 5; i++) {
-                state[i] = THINKING;
+            // inicializa todos como "pensando"
+            for (int i = 0; i < N; i++) state[i] = THINKING;
+        }
+
+        // tenta pegar os dois garfos
+        void pickup(int i) {
+            std::unique_lock<std::mutex> lock(mtx);
+            state[i] = HUNGRY;          // filósofo quer comer
+            test(i);                    // verifica se pode comer
+            if (state[i] != EATING) {
+                // se não puder comer, espera até ser sinalizado
+                cv[i].wait(lock, [&]{ return state[i] == EATING; });
             }
         }
 
-        // Testa se um filósofo pode comer
-        void test(int id) {
-            int left = (id + 4) % 5;  // vizinho à esquerda
-            int right = (id + 1) % 5; // vizinho à direita
-            
-            if (state[id] == HUNGRY && 
-                state[left] != EATING && 
+        // devolve os garfos após comer
+        void putdown(int i) {
+            std::unique_lock<std::mutex> lock(mtx);
+            state[i] = THINKING;        // volta a pensar
+            // verifica se vizinhos agora podem comer
+            test((i + N - 1) % N);
+            test((i + 1) % N);
+        }
+
+    private:
+        // checa se o filósofo i pode começar a comer
+        void test(int i) {
+            int left = (i + N - 1) % N;
+            int right = (i + 1) % N;
+            if (state[i] == HUNGRY &&
+                state[left] != EATING &&
                 state[right] != EATING) {
-                state[id] = EATING;
-                self[id].notify_one();
+                state[i] = EATING;
+                cv[i].notify_one(); // acorda o filósofo i
             }
-        }
-
-        // Filósofo quer começar a comer
-        void pickup_forks(int id) {
-            std::unique_lock<std::mutex> lock(monitor_mutex);
-            
-            state[id] = HUNGRY;
-            test(id);  // vê se pode comer imediatamente
-            
-            // se não pode comer, espera
-            while (state[id] != EATING) {
-                self[id].wait(lock);
-            }
-        }
-
-        // Filósofo terminou de comer
-        void putdown_forks(int id) {
-            std::lock_guard<std::mutex> lock(monitor_mutex);
-            
-            state[id] = THINKING;
-            
-            // testa se os vizinhos podem comer agora
-            int left = (id + 4) % 5;
-            int right = (id + 1) % 5;
-            test(left);
-            test(right);
-        }
-
-        // Para debug - mostra estado atual
-        void show_states() const {
-            std::lock_guard<std::mutex> lock(monitor_mutex);
-            std::cout << "Estados: ";
-            for (int i = 0; i < 5; i++) {
-                char c = (state[i] == THINKING) ? 'T' : 
-                         (state[i] == HUNGRY) ? 'H' : 'E';
-                std::cout << i << ":" << c << " ";
-            }
-            std::cout << std::endl;
         }
     };
 
-    // Instância global do monitor
-    DiningMonitor monitor;
-    
-    std::mutex stats_mutex;      // protege estatísticas
+    // vetor de estatísticas globais
+    std::vector<PhilosopherStats> stats(N);
 
-    const int ROUNDS = 500;      // número fixo de rodadas por filósofo
-
-    struct PhilosopherStats {
-        int meals = 0;
-        std::vector<long long> wait_times; // em ms
-    };
-
-    std::vector<PhilosopherStats> stats(5);
-
-    void philosopherLife(int id) {
+    // função que simula a vida de um filósofo
+    void philosopherLife(int id, DiningMonitor& monitor) {
         for (int count = 0; count < ROUNDS; count++) {
-            // marca início da espera
+            // registra início da espera
             auto start_wait = std::chrono::high_resolution_clock::now();
 
-            // quer comer - pede ao monitor
-            monitor.pickup_forks(id);
+            monitor.pickup(id); // tenta pegar garfos
 
-            // marca fim da espera
+            // registra fim da espera
             auto end_wait = std::chrono::high_resolution_clock::now();
             long long wait_time =
                 std::chrono::duration_cast<std::chrono::milliseconds>(end_wait - start_wait).count();
 
-            {
-                std::lock_guard<std::mutex> lg(stats_mutex);
-                stats[id].meals++;
-                stats[id].wait_times.push_back(wait_time);
-            }
+            // atualiza estatísticas
+            stats[id].meals++;
+            stats[id].wait_times.push_back(wait_time);
 
-            // simula comendo
+            // simula comer
             std::this_thread::sleep_for(std::chrono::milliseconds(10 + rand() % 20));
 
-            // terminou de comer - informa o monitor
-            monitor.putdown_forks(id);
+            monitor.putdown(id); // devolve garfos
 
-            // simula pensando
-            std::this_thread::sleep_for(std::chrono::milliseconds(5 + rand() % 10));
+            // simula pensar
+            std::this_thread::sleep_for(std::chrono::milliseconds(10 + rand() % 20));
         }
     }
-}
+} // namespace
 
+// Função principal para rodar o modo Monitor
 void runMonitorMode(std::vector<Philosopher>& philosophers) {
     std::cout << "[MODO MONITOR] executando...\n";
-    srand(static_cast<unsigned>(time(nullptr))); // inicializa seed do rand
+    srand(static_cast<unsigned>(time(nullptr)));
 
-    // reinicia estatísticas
-    for (auto& s : stats) {
-        s.meals = 0;
-        s.wait_times.clear();
-    }
+    DiningMonitor monitor;
 
     auto start = std::chrono::high_resolution_clock::now();
 
+    // cria threads para cada filósofo
     std::vector<std::thread> threads;
     for (int i = 0; i < (int)philosophers.size(); i++) {
-        threads.emplace_back(philosopherLife, i);
+        threads.emplace_back(philosopherLife, i, std::ref(monitor));
     }
+
+    // espera todas terminarem
     for (auto& t : threads) {
         t.join();
     }

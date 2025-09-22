@@ -9,27 +9,28 @@
 #include <numeric>
 
 namespace {
-    std::mutex forks[5];         // 5 garfos (um mutex por garfo)
-    std::mutex stats_mutex;      // protege estatísticas
+    std::mutex forks[5];         // um mutex para cada garfo
+    std::mutex stats_mutex;      // protege acesso às estatísticas
 
-    const int ROUNDS = 500;      // número fixo de rodadas por filósofo
+    const int ROUNDS = 200;      // rodadas por filósofo
 
     struct PhilosopherStats {
-        int meals = 0;
-        std::vector<long long> wait_times; // em ms
+        int meals = 0;                          // refeições feitas
+        std::vector<long long> wait_times;      // tempos de espera em ms
     };
 
     std::vector<PhilosopherStats> stats(5);
 
+    // função que representa a vida do filósofo
     void philosopherLife(int id) {
-        int left = id;
-        int right = (id + 1) % 5;
+        int left = id;                // garfo da esquerda
+        int right = (id + 1) % 5;     // garfo da direita
 
         for (int count = 0; count < ROUNDS; count++) {
-            // marca início da espera
+            // marca início do tempo de espera
             auto start_wait = std::chrono::high_resolution_clock::now();
 
-            // tenta pegar os garfos
+            // bloqueia os dois garfos de forma atômica
             std::lock(forks[left], forks[right]);
             std::lock_guard<std::mutex> lockLeft(forks[left], std::adopt_lock);
             std::lock_guard<std::mutex> lockRight(forks[right], std::adopt_lock);
@@ -39,28 +40,33 @@ namespace {
             long long wait_time =
                 std::chrono::duration_cast<std::chrono::milliseconds>(end_wait - start_wait).count();
 
+            // atualiza estatísticas protegidas por mutex
             {
                 std::lock_guard<std::mutex> lg(stats_mutex);
                 stats[id].meals++;
                 stats[id].wait_times.push_back(wait_time);
             }
 
-            // simula comendo (curto, só para testar rápido)
+            // simula tempo de comer
             std::this_thread::sleep_for(std::chrono::milliseconds(10 + rand() % 20));
         }
     }
 }
 
+// Função principal do modo Mutex
 void runMutexMode(std::vector<Philosopher>& philosophers) {
     std::cout << "[MODO MUTEX] executando...\n";
-    srand(static_cast<unsigned>(time(nullptr))); // inicializa seed do rand
+    srand(static_cast<unsigned>(time(nullptr)));
 
     auto start = std::chrono::high_resolution_clock::now();
 
+    // cria threads
     std::vector<std::thread> threads;
     for (int i = 0; i < (int)philosophers.size(); i++) {
         threads.emplace_back(philosopherLife, i);
     }
+
+    // aguarda todas terminarem
     for (auto& t : threads) {
         t.join();
     }
