@@ -4,7 +4,6 @@
 #include <limits>
 
 #include "philosopher.hpp"
-#include "diningtable.hpp"
 #include "mutexmode.hpp"
 #include "waitermode.hpp"
 #include "semaphoremode.hpp"
