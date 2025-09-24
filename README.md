@@ -102,37 +102,43 @@ Basta digitar a opção desejada.
 
 ### Garçom / Árbitro
 ```text
-Filosofo 0 -> refeicoes: 500, espera media: 23.822 ms
-Filosofo 1 -> refeicoes: 500, espera media: 23.758 ms
-Filosofo 2 -> refeicoes: 500, espera media: 21.182 ms
-Filosofo 3 -> refeicoes: 500, espera media: 22.730 ms
-Filosofo 4 -> refeicoes: 500, espera media: 24.484 ms
-Tempo total da simulacao: 33367 ms
+Filosofo 0 -> refeicoes: 200, espera media: 26.915 ms
+Filosofo 1 -> refeicoes: 200, espera media: 22.375 ms
+Filosofo 2 -> refeicoes: 200, espera media: 22.87 ms
+Filosofo 3 -> refeicoes: 200, espera media: 22.06 ms
+Filosofo 4 -> refeicoes: 200, espera media: 22.89 ms
+Tempo total da simulacao: 13970 ms
 ```
 
 ### Semáforos
 ```text
-Filosofo 0 -> refeicoes: 200, espera media: 47.860 ms
-Filosofo 1 -> refeicoes: 200, espera media: 48.940 ms
-Filosofo 2 -> refeicoes: 200, espera media: 48.205 ms
-Filosofo 3 -> refeicoes: 200, espera media: 47.755 ms
-Filosofo 4 -> refeicoes: 200, espera media: 47.780 ms
-Tempo total da simulacao: 20578 ms
+Filosofo 0 -> refeicoes: 200, espera media: 21.605 ms
+Filosofo 1 -> refeicoes: 200, espera media: 22.735 ms
+Filosofo 2 -> refeicoes: 200, espera media: 22.24 ms
+Filosofo 3 -> refeicoes: 200, espera media: 23.165 ms
+Filosofo 4 -> refeicoes: 200, espera media: 21.755 ms
+Tempo total da simulacao: 15526 ms
 ```
 
 ### Mutex
 ```text
-Filosofo 0 -> refeicoes: 500, espera media: 38.780 ms
-Filosofo 1 -> refeicoes: 500, espera media: 39.702 ms
-Filosofo 2 -> refeicoes: 500, espera media: 37.706 ms
-Filosofo 3 -> refeicoes: 500, espera media: 39.382 ms
-Filosofo 4 -> refeicoes: 500, espera media: 38.196 ms
-Tempo total da simulacao: 33176 ms
+Filosofo 0 -> refeicoes: 200, espera media: 38.115 ms
+Filosofo 1 -> refeicoes: 200, espera media: 38.935 ms
+Filosofo 2 -> refeicoes: 200, espera media: 41.14 ms
+Filosofo 3 -> refeicoes: 200, espera media: 40.89 ms
+Filosofo 4 -> refeicoes: 200, espera media: 34.17 ms
+Tempo total da simulacao: 13703 ms
 ```
 
 ### Monitor
-*(valores variam por execução, exemplo esperado: refeições balanceadas, espera média ~25–30 ms, tempo total ~20–25 s)*
-
+```text
+Filosofo 0 -> refeicoes: 200, espera media: 18.32 ms
+Filosofo 1 -> refeicoes: 200, espera media: 19.28 ms
+Filosofo 2 -> refeicoes: 200, espera media: 13.245 ms
+Filosofo 3 -> refeicoes: 200, espera media: 10.36 ms
+Filosofo 4 -> refeicoes: 200, espera media: 13.635 ms
+Tempo total da simulacao: 14692 ms
+```
 ---
 
 ## 👥 Autores
